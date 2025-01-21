@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="源文件\http server">
+      <UniqueIdentifier>{740f6da7-e344-4698-a01f-6d2b7f420009}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\log">
+      <UniqueIdentifier>{4d75ca5b-6eaf-473c-83dc-e8adec4e8f2d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\tool">
+      <UniqueIdentifier>{262ced36-7312-4228-9427-c5e195b7ea19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\data">
+      <UniqueIdentifier>{31d7db36-f1ba-4b15-92e8-63cfba088880}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\data\userdata">
+      <UniqueIdentifier>{d3650a8f-416d-4d56-a87b-6f9610b2fb60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\tool\config">
+      <UniqueIdentifier>{5f82d762-c2b1-49e6-b39d-5c7b6e7bf495}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\http server\server">
+      <UniqueIdentifier>{1dbc8f13-f3b3-46c2-acc7-cb2e589cf7c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\json">
+      <UniqueIdentifier>{c38220ff-f19d-4816-9bf4-7d297f540e0c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\http server\html">
+      <UniqueIdentifier>{11630c66-0ea3-494b-a15b-1e76a71ba999}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="http server\server.cpp">
+      <Filter>源文件\http server</Filter>
+    </ClCompile>
+    <ClCompile Include="data\userdata\datamanage.cpp">
+      <Filter>源文件\data\userdata</Filter>
+    </ClCompile>
+    <ClCompile Include="log\log.cpp">
+      <Filter>源文件\log</Filter>
+    </ClCompile>
+    <ClCompile Include="tool\config\config.cpp">
+      <Filter>源文件\tool\config</Filter>
+    </ClCompile>
+    <ClCompile Include="tool\tool.cpp">
+      <Filter>源文件\tool</Filter>
+    </ClCompile>
+    <ClCompile Include="http server\server\guide.cpp">
+      <Filter>源文件\http server\server</Filter>
+    </ClCompile>
+    <ClCompile Include="jsoncpp.cpp">
+      <Filter>源文件\json</Filter>
+    </ClCompile>
+    <ClCompile Include="chatroom.cpp">
+      <Filter>源文件\http server\server</Filter>
+    </ClCompile>
+    <ClCompile Include="ctrl.cpp">
+      <Filter>源文件\http server</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\..\Tencent Files\71415162\nt_qq\nt_data\Pic\2025-01\Ori\30250816795ecbd1a2bc2aec3925e2b7.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="html\logo.png">
+      <Filter>源文件\http server\html</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\config.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\datamanage.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\httplib.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\log.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Server.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sha256.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SHA-256.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="json\json.h">
+      <Filter>源文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="json\json-forwards.h">
+      <Filter>源文件\json</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="html\index.html">
+      <Filter>源文件\http server\html</Filter>
+    </None>
+    <None Include="html\login.html">
+      <Filter>源文件\http server\html</Filter>
+    </None>
+    <None Include="html\chatroom.js">
+      <Filter>源文件\http server\html</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="keyword.txt" />
+  </ItemGroup>
+</Project>
