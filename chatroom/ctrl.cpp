@@ -69,7 +69,9 @@ void command_runner(string command) {
 		command.erase(0, 4);
 		message = command;
 		for (size_t i = message.size() - 1; message[i] == ' '; i--) message.pop_back();
-		chatroom::systemMessage(convertToUTF8(message));
+		string UTF8msg = message;
+		string GBKmsg = WordCode::Utf8ToGbk(UTF8msg.c_str());
+		chatroom::systemMessage(convertToUTF8(GBKmsg));
 		logger.logInfo("Control", "消息已发送" + command);
 
 	}

@@ -1,6 +1,7 @@
 #include "../Server.h"
 #include <vector>
 #include <string>
+#include <ctime>
 #include <deque>
 #include <../../json/json.h>
 #include "../datamanage.h"
@@ -18,6 +19,7 @@ namespace chatroom {
         Json::Value initialMessage;
         initialMessage["user"] = "system";
         initialMessage["labei"] = "GM";
+        initialMessage["timestamp"] = time(0);
         initialMessage["message"] = Base64::base64_encode("wellcome!");
         chatMessages.push_back(initialMessage);
     }
@@ -31,6 +33,7 @@ namespace chatroom {
         Json::Value initialMessage;
         initialMessage["user"] = "system";
         initialMessage["labei"] = "GM";
+        initialMessage["timestamp"] = time(0);
         initialMessage["message"] = Base64::base64_encode(message);
 
 
@@ -38,7 +41,7 @@ namespace chatroom {
 
 
         Logger& logger = logger.getInstance();
-        logger.logInfo("chatroom::message", transJsonMessage(initialMessage));
+        logger.logInfo("chatroom::message", WordCode::GbkToUtf8(transJsonMessage(initialMessage).c_str()));
     }
 
     void getChatMessages(const httplib::Request& req, httplib::Response& res) {
@@ -117,12 +120,12 @@ namespace chatroom {
         Json::Value newMessage;
         newMessage["user"] = nowuser.getname();
         newMessage["labei"] = nowuser.getlabei();
-        string msgSafe = Base64::base64_decode(root["message"].asString());
-        string codedmsg = Base64::base64_encode(Keyword::process_string(msgSafe));
+        string msgSafe = Keyword::process_string(Base64::base64_decode(root["message"].asString()));
+        string codedmsg = Base64::base64_encode(msgSafe);
 
         newMessage["message"] = codedmsg;
         newMessage["imageUrl"] = root["imageUrl"];
-
+        newMessage["timestamp"] = root["timestamp"];
 
         lock_guard<mutex> lock(mtx);
         //if (chatMessages.back() != newMessage) 
@@ -130,7 +133,7 @@ namespace chatroom {
         if (chatMessages.size() >= MAXSIZE) chatMessages.pop_front();
 
         //Logger& logger = logger.getInstance();
-        logger.logInfo("chatroom::message", transJsonMessage(newMessage));
+        logger.logInfo("chatroom::message", (("[" + nowuser.getname() + "][" + WordCode::GbkToUtf8(msgSafe.c_str()) + "]")));
 
 
         // œÏ”¶ OK

@@ -19,25 +19,18 @@
             align-items: center;
             background-color: #007BFF;
             color: white;
-            padding: 5px 20px; /* 压缩间距 */
+            padding: 5px 20px;
             justify-content: space-between;
         }
 
             .header img {
                 height: 40px;
-                margin-right: 10px; /* Logo和标题之间的间距 */
+                margin-right: 10px;
             }
 
             .header .chatroom-title {
-                font-size: 20px; /* 调整字体大小 */
+                font-size: 20px;
                 font-weight: bold;
-                color: white;
-            }
-
-            .header .username {
-                font-size: 18px;
-                font-weight: bold;
-                margin-right: 20px; /* 增大用户名与按钮之间的间距 */
             }
 
             .header button {
@@ -47,7 +40,7 @@
                 color: #007BFF;
                 border: none;
                 font-size: 16px;
-                margin-right: 20px; /* 增大按钮与其他按钮之间的间距 */
+                margin-right: 20px;
                 background-color: #dcdcdc;
             }
 
@@ -64,46 +57,27 @@
             overflow: hidden;
         }
 
-        /* 默认滚动条样式 */
         .chat-box {
             max-height: 400px;
             overflow-y: auto;
             padding: 10px;
             background-color: #fafafa;
-            scrollbar-width: thin; /* Firefox */
-            scrollbar-color: #888 #e0e0e0; /* Firefox */
+            scrollbar-width: thin;
+            scrollbar-color: #888 #e0e0e0;
         }
 
             .chat-box::-webkit-scrollbar {
-                width: 8px; /* 自定义滚动条宽度 */
+                width: 8px;
             }
 
             .chat-box::-webkit-scrollbar-thumb {
-                background-color: #888; /* 滚动条滑块颜色 */
-                border-radius: 4px; /* 滚动条滑块圆角 */
+                background-color: #888;
+                border-radius: 4px;
             }
 
             .chat-box::-webkit-scrollbar-track {
-                background-color: #e0e0e0; /* 滚动条背景色 */
+                background-color: #e0e0e0;
             }
-
-        /* 深色模式下滚动条样式 */
-        body.dark-mode .chat-box {
-            background-color: #555;
-        }
-
-            body.dark-mode .chat-box::-webkit-scrollbar-thumb {
-                background-color: #bbb; /* 滚动条滑块颜色 */
-            }
-
-            body.dark-mode .chat-box::-webkit-scrollbar-track {
-                background-color: #444; /* 滚动条背景色 */
-            }
-
-        body.dark-mode .chat-box {
-            scrollbar-color: #bbb #444; /* Firefox滚动条颜色 */
-        }
-
 
         .message {
             padding: 8px 12px;
@@ -111,11 +85,31 @@
             border-radius: 8px;
             background-color: #e0e0e0;
             max-width: 80%;
+            transition: background-color 0.3s ease, transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+            display: flex;
+            flex-direction: column;
         }
 
             .message.user {
                 background-color: #d0f0c0;
                 margin-left: auto;
+            }
+
+            .message .header {
+                display: flex;
+                justify-content: space-between;
+                font-size: 0.5em;
+                margin-bottom: 0.5px;
+                background-color: transparent;
+                color: rgba(255, 255, 255, 0.7);
+            }
+
+            .message .timestamp {
+                margin-right: 10px;
+            }
+
+            .message .username {
+                font-weight: bold;
             }
 
         .input-box {
@@ -146,7 +140,6 @@
                     background-color: #0056b3;
                 }
 
-        /* 深色模式 */
         body.dark-mode {
             background-color: #333;
             color: #fff;
@@ -183,7 +176,6 @@
                     background-color: #0056b3;
                 }
 
-            /* 深色模式下调整按钮样式 */
             body.dark-mode .header button {
                 background-color: #444;
                 color: #fff;
@@ -202,19 +194,24 @@
                     background-color: #555;
                 }
 
-
         #sendButton {
             transition: transform 0.1s ease;
         }
 
             #sendButton:active {
-                transform: scale(0.95); /* 按钮缩小 */
+                transform: scale(0.95);
             }
+        .header .username {
+            margin-right: 20px; 
+        }
+
+        .header .theme-toggle {
+            margin-left: 20px; 
+        }
     </style>
 </head>
 <body>
 
-    <!-- 顶部栏 -->
     <div class="header">
         <div style="display: flex; align-items: center;">
             <img src="logo.png" alt="Logo">
@@ -231,19 +228,16 @@
         <div class="chat-box" id="chatBox">
             <!-- 聊天内容会显示在这里 -->
         </div>
-        <!-- 输入框区域，支持文本与图片的输入 -->
         <div class="input-box">
             <input type="text" id="messageInput" placeholder="请输入消息..." />
             <input type="file" id="imageInput" accept="image/*" style="display: none;" />
             <button onclick="sendMessage()">发送</button>
             <button onclick="selectImage()">上传图片</button>
-            <div id="imagePreview" style="display: inline-block; margin-left: 10px;"></div>  <!-- 显示缩略图的位置 -->
+            <div id="imagePreview" style="display: inline-block; margin-left: 10px;"></div>
         </div>
     </div>
 
-
     <script src="/chat/js"></script>
-    
 
 </body>
 </html>

@@ -51,6 +51,8 @@ function decodeBase64(base64Str) {
     return decoder.decode(uint8Array); // 使用 TextDecoder 解码为原始字符串
 }
 
+
+
 // 拉取聊天记录并渲染
 async function fetchChatMessages() {
     try {
@@ -73,43 +75,75 @@ async function fetchChatMessages() {
             chatBox.innerHTML = messages.map(msg => {
                 let messageStyle = '';
                 let messageContent = '';
-
+                var background_color,textcolor
                 switch (msg.labei) {
                     case 'GM':
                         messageStyle = 'background-color: white; color: black;';
+                        background_color = 'whilte', textcolor = 'black';
                         break;
                     case 'U':
                         messageStyle = 'background-color: rgba(0, 204, 255, 0.10); color: black;';
+                        background_color = 'rgba(0, 204, 255, 0.10)', textcolor = 'black';
                         break;
                     case 'BAN':
                         messageStyle = 'background-color: black; color: black;';
+                        background_color = 'black', textcolor = 'black';
                         break;
                     default:
                         messageStyle = 'background-color: white; color: black;';
+                        background_color = 'whilte', textcolor = 'black';
                 }
 
                 // 深色模式下修改用户消息和背景的颜色为反转颜色
                 if (document.body.classList.contains("dark-mode")) {
                     if (msg.labei === 'GM') {
                         messageStyle = 'background-color: black; color: white;';
+                        background_color = 'black', textcolor = 'white';
                     } else if (msg.labei === 'U') {
                         messageStyle = 'background-color: rgba(0, 204, 255, 0.15); color: white;';
+                        background_color = 'rgba(0, 204, 255, 0.15)', textcolor = 'white';
                     } else if (msg.labei === 'BAN') {
                         messageStyle = 'background-color: white; color: white;';
+                        background_color = 'white', textcolor = 'white';
                     } else {
                         messageStyle = 'background-color: black; color: white;';
+                        background_color = 'black', textcolor = 'white';
                     }
                 }
 
                 // 解码消息内容
                 const decodedMessage = decodeBase64(msg.message);
 
+                // 格式化时间戳
+                const messageTime = new Date(msg.timestamp).toLocaleTimeString();
+
                 // 如果消息中包含图片 URL，则渲染图片
                 if (msg.imageUrl) {
-                    messageContent = `<div class="message ${msg.user === 'system' ? '' : 'user'}" style="${messageStyle}; white-space: normal; word-wrap: break-word;">${msg.user}: <br><img src="${msg.imageUrl}" alt="Image" style="max-width: 100%; height: auto;" /><br>${decodedMessage}</div>`;
+                    messageContent = `
+        <div class="message ${msg.user === 'system' ? '' : 'user'}" style="${messageStyle}; white-space: normal; word-wrap: break-word;">
+            <div class="header" style="background-color: rgba(0, 204, 255, 0.00);"> <!-- 设置背景色与聊天框一致 -->
+                <div class="timestamp" style="color:${textcolor};">${messageTime}</div>
+                <div class="username" style="color:${textcolor};">${msg.user}</div> 
+            </div>
+            <div class="image-message">
+                 <br><img src="${msg.imageUrl}" alt="Image" style="max-width: 100%; height: auto;" /><br>
+                ${decodedMessage}
+            </div>
+        </div>`;
                 } else {
-                    messageContent = `<div class="message ${msg.user === 'system' ? '' : 'user'}" style="${messageStyle}; white-space: normal; word-wrap: break-word;">${msg.user}: ${decodedMessage}</div>`;
+                    messageContent = `
+        <div class="message ${msg.user === 'system' ? '' : 'user'}" style="${messageStyle}; white-space: normal; word-wrap: break-word;">
+            <div class="header" style="background-color: rgba(0, 204, 255, 0.00);"> <!-- 设置背景色与聊天框一致 -->
+                <div class="timestamp" style="color:${textcolor};">${messageTime}</div>
+                <div class="username" style="color:${textcolor};">${msg.user}</div> 
+            </div>
+            <div class="message-body">
+                 ${decodedMessage}
+            </div>
+        </div>`;
                 }
+
+                
 
                 return messageContent;
             }).join('');
@@ -199,7 +233,8 @@ async function sendMessage() {
     const message = {
         message: encodeBase64(messageText),
         uid: uid,
-        imageUrl: imageUrl  // 如果有图片，添加图片 URL
+        imageUrl: imageUrl,  
+        timestamp: new Date().toISOString()  // 添加时间戳
     };
 
     try {
@@ -302,3 +337,4 @@ sendButton.addEventListener("click", function () {
         sendButton.classList.remove("clicked");
     }, 200);  // 动效持续时间
 });
+
