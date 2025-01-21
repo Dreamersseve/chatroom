@@ -51,9 +51,29 @@ function decodeBase64(base64Str) {
     return decoder.decode(uint8Array); // 使用 TextDecoder 解码为原始字符串
 }
 
+
 // 拉取聊天记录并渲染
 async function fetchChatMessages() {
     try {
+
+
+let isTextSelected = false;
+
+// 监听消息框中的文本选择事件
+chatBox.addEventListener('mousedown', function () {
+    isTextSelected = true;  // 用户开始选择文本
+});
+
+chatBox.addEventListener('mouseup', function () {
+    isTextSelected = false;  // 用户结束选择文本
+});
+
+
+async function fetchChatMessages() {
+    try {
+        // 如果当前有文本被选中，则不刷新聊天内容
+        if (isTextSelected) return;
+
         const response = await fetch(`${serverUrl}/chat/messages`);
         if (response.ok) {
             const messages = await response.json();
@@ -122,6 +142,10 @@ async function fetchChatMessages() {
 }
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 淇敼鍒锋柊閫昏緫娣诲姞椤圭洰鏂囦欢銆?
 const imageInput = document.getElementById("imageInput");
 
 const imagePreview = document.getElementById("imagePreview");  // 用于显示缩略图的元素
@@ -160,7 +184,11 @@ async function uploadImage(file) {
         });
         //console.log("114514");
         if (response.ok) {
+<<<<<<< HEAD
             
+=======
+
+>>>>>>> 淇敼鍒锋柊閫昏緫娣诲姞椤圭洰鏂囦欢銆?
             const data = await response.json();
             return data.imageUrl; // 返回图片的 URL
         } else {
