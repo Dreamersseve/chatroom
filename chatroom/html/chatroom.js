@@ -59,6 +59,14 @@ async function fetchChatMessages() {
             const messages = await response.json();
             const isScrolledToBottom = chatBox.scrollHeight - chatBox.clientHeight <= chatBox.scrollTop + 1;
 
+            // 检查用户是否选中聊天框文本
+            const isTextSelected = window.getSelection().toString() !== '';
+
+            // 如果文本被选中，则不进行刷新
+            if (isTextSelected) {
+                return;
+            }
+
             // 保存当前滚动位置
             const previousScrollTop = chatBox.scrollTop;
 
