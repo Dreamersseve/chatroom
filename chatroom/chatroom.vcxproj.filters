@@ -126,6 +126,9 @@
     <None Include="html\chatroom.js">
       <Filter>源文件\http server\html</Filter>
     </None>
+    <None Include="html\files\terms.html">
+      <Filter>源文件\http server\html</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="keyword.txt" />

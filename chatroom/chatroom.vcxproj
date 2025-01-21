@@ -169,6 +169,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="html\chatroom.js" />
+    <None Include="html\files\terms.html" />
     <None Include="html\index.html" />
     <None Include="html\login.html" />
   </ItemGroup>

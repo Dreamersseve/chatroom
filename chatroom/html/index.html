@@ -21,6 +21,7 @@
             color: white;
             padding: 5px 20px;
             justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
             .header img {
@@ -29,7 +30,7 @@
             }
 
             .header .chatroom-title {
-                font-size: 20px;
+                font-size: 22px;
                 font-weight: bold;
             }
 
@@ -42,10 +43,12 @@
                 font-size: 16px;
                 margin-right: 20px;
                 background-color: #dcdcdc;
+                transition: background-color 0.2s, transform 0.1s ease;
             }
 
                 .header button:hover {
                     background-color: #c0c0c0;
+                    transform: scale(1.1);
                 }
 
         .chat-container {
@@ -55,6 +58,7 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            animation: fadeIn 1s ease-out;
         }
 
         .chat-box {
@@ -64,6 +68,7 @@
             background-color: #fafafa;
             scrollbar-width: thin;
             scrollbar-color: #888 #e0e0e0;
+            animation: fadeIn 1.5s ease-out;
         }
 
             .chat-box::-webkit-scrollbar {
@@ -102,6 +107,7 @@
                 margin-bottom: 0.5px;
                 background-color: transparent;
                 color: rgba(255, 255, 255, 0.7);
+                box-shadow: none;
             }
 
             .message .timestamp {
@@ -124,7 +130,12 @@
                 padding: 10px;
                 border: 1px solid #ccc;
                 border-radius: 5px;
+                transition: border-color 0.2s;
             }
+
+                .input-box input:focus {
+                    border-color: #007BFF;
+                }
 
             .input-box button {
                 padding: 10px;
@@ -134,10 +145,12 @@
                 color: white;
                 cursor: pointer;
                 border-radius: 5px;
+                transition: background-color 0.2s, transform 0.1s ease;
             }
 
                 .input-box button:hover {
                     background-color: #0056b3;
+                    transform: scale(1.1);
                 }
 
         body.dark-mode {
@@ -201,12 +214,55 @@
             #sendButton:active {
                 transform: scale(0.95);
             }
+
         .header .username {
-            margin-right: 20px; 
+            margin-right: 20px;
         }
 
         .header .theme-toggle {
-            margin-left: 20px; 
+            margin-left: 20px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .message.fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #f1f1f1;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #333;
+            border-top: 1px solid #ddd;
+        }
+
+        body.dark-mode .footer {
+            background-color: #444;
+            color: #fff;
+        }
+
+        .footer a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+
+            .footer a:hover {
+                text-decoration: underline;
+            }
+
+        body.dark-mode .footer a {
+            color: #66aaff;
         }
     </style>
 </head>
@@ -235,6 +291,10 @@
             <button onclick="selectImage()">上传图片</button>
             <div id="imagePreview" style="display: inline-block; margin-left: 10px;"></div>
         </div>
+    </div>
+
+    <div class="footer">
+        <p>© 2025 seve's chatroom | <a href="/files/terms.html">使用条款</a></p>
     </div>
 
     <script src="/chat/js"></script>

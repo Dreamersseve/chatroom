@@ -53,7 +53,8 @@ function decodeBase64(base64Str) {
 
 
 
-// 拉取聊天记录并渲染
+let lastRenderedTimestamp = 0;  // 用于存储最后渲染的时间戳
+
 async function fetchChatMessages() {
     try {
         const response = await fetch(`${serverUrl}/chat/messages`);
@@ -72,14 +73,31 @@ async function fetchChatMessages() {
             // 保存当前滚动位置
             const previousScrollTop = chatBox.scrollTop;
 
-            chatBox.innerHTML = messages.map(msg => {
+            let newMessages = [];
+
+            // 只渲染时间戳大于 lastRenderedTimestamp 的消息
+            messages.forEach(msg => {
+                const msgTimestamp = new Date(msg.timestamp).getTime();  // 获取消息的时间戳
+
+                // 如果消息是新消息，添加动画类
+                if (msgTimestamp > lastRenderedTimestamp) {
+
+                    msg.isNew = true; // 标记该消息为新消息
+                    lastRenderedTimestamp = msgTimestamp;  // 更新最后渲染的时间戳
+                }
+
+                newMessages.push(msg);
+            });
+
+            chatBox.innerHTML = newMessages.map(msg => {
                 let messageStyle = '';
                 let messageContent = '';
-                var background_color,textcolor
+                let background_color, textcolor;
+
                 switch (msg.labei) {
                     case 'GM':
                         messageStyle = 'background-color: white; color: black;';
-                        background_color = 'whilte', textcolor = 'black';
+                        background_color = 'white', textcolor = 'black';
                         break;
                     case 'U':
                         messageStyle = 'background-color: rgba(0, 204, 255, 0.10); color: black;';
@@ -91,7 +109,7 @@ async function fetchChatMessages() {
                         break;
                     default:
                         messageStyle = 'background-color: white; color: black;';
-                        background_color = 'whilte', textcolor = 'black';
+                        background_color = 'white', textcolor = 'black';
                 }
 
                 // 深色模式下修改用户消息和背景的颜色为反转颜色
@@ -120,10 +138,10 @@ async function fetchChatMessages() {
                 // 如果消息中包含图片 URL，则渲染图片
                 if (msg.imageUrl) {
                     messageContent = `
-        <div class="message ${msg.user === 'system' ? '' : 'user'}" style="${messageStyle}; white-space: normal; word-wrap: break-word;">
-            <div class="header" style="background-color: rgba(0, 204, 255, 0.00);"> <!-- 设置背景色与聊天框一致 -->
+        <div class="message ${msg.user === 'system' ? '' : 'user'} ${msg.isNew ? 'fade-in' : ''}" style="${messageStyle}; white-space: normal; word-wrap: break-word;">
+            <div class="header" style="background-color: rgba(0, 204, 255, 0.00);">
+                <div class="username" style="color:${textcolor};">${msg.user}</div>
                 <div class="timestamp" style="color:${textcolor};">${messageTime}</div>
-                <div class="username" style="color:${textcolor};">${msg.user}</div> 
             </div>
             <div class="image-message">
                  <br><img src="${msg.imageUrl}" alt="Image" style="max-width: 100%; height: auto;" /><br>
@@ -132,10 +150,10 @@ async function fetchChatMessages() {
         </div>`;
                 } else {
                     messageContent = `
-        <div class="message ${msg.user === 'system' ? '' : 'user'}" style="${messageStyle}; white-space: normal; word-wrap: break-word;">
-            <div class="header" style="background-color: rgba(0, 204, 255, 0.00);"> <!-- 设置背景色与聊天框一致 -->
+        <div class="message ${msg.user === 'system' ? '' : 'user'} ${msg.isNew ? 'fade-in' : ''}" style="${messageStyle}; white-space: normal; word-wrap: break-word;">
+            <div class="header" style="background-color: rgba(0, 204, 255, 0.00);">
+                <div class="username" style="color:${textcolor};">${msg.user}</div>
                 <div class="timestamp" style="color:${textcolor};">${messageTime}</div>
-                <div class="username" style="color:${textcolor};">${msg.user}</div> 
             </div>
             <div class="message-body">
                  ${decodedMessage}
@@ -162,6 +180,7 @@ async function fetchChatMessages() {
         console.error("Error fetching chat messages:", error);
     }
 }
+
 
 
 const imageInput = document.getElementById("imageInput");

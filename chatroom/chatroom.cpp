@@ -227,10 +227,31 @@ namespace chatroom {
                 res.set_content("Image not found", "text/plain");
             }
             });
+
+        // 提供图片文件 /files/*，动态路由
+        server.getInstance().handleRequest(R"(/files/([^/]+))", [](const httplib::Request& req, httplib::Response& res) {
+            std::string imagePath = "html/files/" + req.matches[1].str();  // 获取图片文件名
+            std::ifstream imageFile(imagePath, std::ios::binary);
+
+            if (imageFile) {
+                std::stringstream buffer;
+                buffer << imageFile.rdbuf();
+
+                // 自动推测图片的 MIME 类型
+                std::string extension = imagePath.substr(imagePath.find_last_of('.') + 1);
+                std::string mimeType = "text/html";
+
+                res.set_content(buffer.str(), mimeType);
+            }
+            else {
+                res.status = 404;
+                res.set_content("File not found", "text/plain");
+            }
+            });
     }
 
     // 允许的图片类型
-    const std::vector<std::string> allowedImageTypes = { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
+    const std::vector<std::string> allowedImageTypes = { ".jpg", ".jpeg", ".png", ".gif", ".bmp" ,"webp"};
 
     bool isValidImage(const std::string& filename) {
         // 获取文件扩展名
