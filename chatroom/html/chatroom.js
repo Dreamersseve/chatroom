@@ -279,7 +279,7 @@ async function sendMessage() {
             deleteCookie("uid");
             window.location.href = "/login";
         } else {
-            window.location.href = "/login";
+            alert('消息发送失败');
             console.error("Error sending message:", await response.text());
         }
     } catch (error) {
@@ -345,15 +345,39 @@ setInterval(fetchChatMessages, 500);
 
 fetchUsername(); // 获取并显示用户名
 
-const sendButton = document.getElementById("sendButton");
 
-sendButton.addEventListener("click", function () {
-    // 启动点击效果
-    sendButton.classList.add("clicked");
 
-    // 等待一小段时间后移除点击效果类
-    setTimeout(() => {
-        sendButton.classList.remove("clicked");
-    }, 200);  // 动效持续时间
-});
 
+
+    // 获取聊天室列表并渲染
+    async function fetchChatList() {
+        try {
+            const response = await fetch(`${serverUrl}/list`);
+            if (response.ok) {
+                const chatRooms = await response.json();
+                const chatListContainer = document.getElementById('chatList');
+                chatListContainer.innerHTML = ''; // 清空之前的聊天室列表
+
+                chatRooms.forEach(room => {
+                    const chatCard = document.createElement('div');
+                    chatCard.classList.add('chat-card');
+                    chatCard.textContent = room.name;
+
+                    // 点击聊天室卡片时跳转到对应聊天室
+                    chatCard.addEventListener('click', () => {
+                        window.location.href = `/chat${room.id}`;
+                    });
+
+                    chatListContainer.appendChild(chatCard);
+                });
+            } else {
+                console.error("Error fetching chat list:", response.statusText);
+            }
+        } catch (error) {
+            console.error("Error fetching chat list:", error);
+        }
+    }
+
+    // 在页面加载时拉取聊天室列表
+    fetchChatList();
+setInterval(fetchChatList, 2000);

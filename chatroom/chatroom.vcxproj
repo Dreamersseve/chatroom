@@ -141,11 +141,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="chatroom.cpp" />
-    <ClCompile Include="ctrl.cpp" />
     <ClCompile Include="data\userdata\datamanage.cpp" />
+    <ClCompile Include="http server\ctrl.cpp" />
     <ClCompile Include="http server\server.cpp" />
+    <ClCompile Include="http server\server\chatroom.cpp" />
     <ClCompile Include="http server\server\guide.cpp" />
+    <ClCompile Include="http server\server\roommanager.cpp" />
     <ClCompile Include="jsoncpp.cpp" />
     <ClCompile Include="log\log.cpp" />
     <ClCompile Include="main.cpp" />
@@ -157,6 +158,8 @@
     <Image Include="html\logo.png" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="http server\server\chatroom.h" />
+    <ClInclude Include="http server\server\roommanager.h" />
     <ClInclude Include="include\config.h" />
     <ClInclude Include="include\datamanage.h" />
     <ClInclude Include="include\httplib.h" />

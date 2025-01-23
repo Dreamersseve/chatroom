@@ -5,13 +5,18 @@
 #include <corecrt_wstring.h>
 #include <locale>
 #include <codecvt>
+#include "server/chatroom.h" 
+#include "server/roommanager.h"
 //using namespace std;
-
 std::string convertToUTF8(const std::string& input) {
 	return input;
 }
+void start_loginSystem();
+void start();
 
-void command_runner(string command) {
+
+
+void command_runner(string command,int roomid) {
 	command += "                                 ";
 
 	Logger& logger = logger.getInstance();
@@ -31,23 +36,11 @@ void command_runner(string command) {
 		
 	}
 	else if (command.substr(0, 5) == "start") {
-		try {
-			if (command.substr(7, 6) == "server") {
-				//  start_chatroom();
-				//  start_loginSystem();
-				server.start();
-				logger.logInfo("Control", "服务器已开启" + command);
-			}
-			else if (command.substr(7, 5) == "login") {
-				//  start_chatroom();
-				start_loginSystem();
 
-			}
-			else if (command.substr(7, 4) == "room") {
-				start_chatroom();
-			}
-			else {
-				start_chatroom();
+		try {
+			{
+				start();
+				testroom.start();
 				start_loginSystem();
 				manager::ReadUserData("./", manager::datafile);
 				logger.logInfo("Control", "数据已加载" + command);
@@ -71,12 +64,12 @@ void command_runner(string command) {
 		for (size_t i = message.size() - 1; message[i] == ' '; i--) message.pop_back();
 		string UTF8msg = message;
 		string GBKmsg = WordCode::Utf8ToGbk(UTF8msg.c_str());
-		chatroom::systemMessage(convertToUTF8(GBKmsg));
+		testroom.systemMessage(convertToUTF8(GBKmsg));
 		logger.logInfo("Control", "消息已发送" + command);
 
 	}
 	else if (command.substr(0, 5) == "clear") {
-		chatroom::chatMessages.clear();
+		testroom.clearMessage();
 		logger.logInfo("Control", "消息列表已清空" + command);
 	}
 	else {
@@ -95,6 +88,10 @@ void command() {
 }
 #include <thread>
 void run() {
+
+	testroom.allowID.push_back(0);
+	testroom.allowID.push_back(1);
+
 	std::thread maint(command);
 	maint.join();
 	Logger& logger = logger.getInstance();

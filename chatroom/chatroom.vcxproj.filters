@@ -66,11 +66,14 @@
     <ClCompile Include="jsoncpp.cpp">
       <Filter>源文件\json</Filter>
     </ClCompile>
-    <ClCompile Include="chatroom.cpp">
+    <ClCompile Include="http server\server\chatroom.cpp">
       <Filter>源文件\http server\server</Filter>
     </ClCompile>
-    <ClCompile Include="ctrl.cpp">
+    <ClCompile Include="http server\ctrl.cpp">
       <Filter>源文件\http server</Filter>
+    </ClCompile>
+    <ClCompile Include="http server\server\roommanager.cpp">
+      <Filter>源文件\http server\server</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -114,6 +117,12 @@
     </ClInclude>
     <ClInclude Include="json\json-forwards.h">
       <Filter>源文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="http server\server\chatroom.h">
+      <Filter>源文件\http server\server</Filter>
+    </ClInclude>
+    <ClInclude Include="http server\server\roommanager.h">
+      <Filter>源文件\http server\server</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

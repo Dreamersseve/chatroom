@@ -8,14 +8,11 @@
 #include "../tool.h"
 using namespace std;
 #include <filesystem>
-namespace chatroom {
-    using namespace std;
-    const int MAXSIZE = 1000;
-#include <filesystem>
-    deque<Json::Value> chatMessages;
-    Server& server = server.getInstance(HOST);
+#include "chatroom.h"
 
-    void initializeChatRoom() {
+
+//---------chatroom
+    void chatroom::initializeChatRoom() {
         Json::Value initialMessage;
         initialMessage["user"] = "system";
         initialMessage["labei"] = "GM";
@@ -24,12 +21,11 @@ namespace chatroom {
         chatMessages.push_back(initialMessage);
     }
 
-    string transJsonMessage(Json::Value m) {
+    string chatroom::transJsonMessage(Json::Value m) {
         string message = m["message"].asString();
         return "[" + m["user"].asString() + "][" + Base64::base64_decode(message) + "]";
     }
-
-    void systemMessage(string message) {
+    void chatroom::systemMessage(string message) {
         Json::Value initialMessage;
         initialMessage["user"] = "system";
         initialMessage["labei"] = "GM";
@@ -44,7 +40,29 @@ namespace chatroom {
         logger.logInfo("chatroom::message", WordCode::GbkToUtf8(transJsonMessage(initialMessage).c_str()));
     }
 
-    void getChatMessages(const httplib::Request& req, httplib::Response& res) {
+    bool chatroom::checkAllowId(const int ID) {
+        for (auto x : allowID) {
+            if (x == ID) return true;
+        }
+        return false;
+    }
+
+    bool chatroom::checkAllowId(const string name) {
+        int ID = manager::FindUser(name)->getuid();
+        for (auto x : allowID) {
+            if (x == ID) return true;
+        }
+        return false;
+    }
+
+    void chatroom::getChatMessages(const httplib::Request& req, httplib::Response& res) {
+
+        if (!checkCookies(req)) {
+            res.status = 400;
+            res.set_content("Invalid Cookie", "text/plain");
+            return;
+        }
+
         Json::Value response;
         for (const auto& msg : chatMessages) {
             response.append(msg);
@@ -59,7 +77,7 @@ namespace chatroom {
     }
 
     // 解析 Cookie
-    void transCookie(std::string& cid, std::string& uid, std::string cookie) {
+    void chatroom::transCookie(std::string& cid, std::string& uid, std::string cookie) {
         std::string::size_type pos1 = cookie.find("clientid=");
         if (pos1 != std::string::npos) {
             pos1 += 9; // Skip over "clientid="
@@ -77,10 +95,27 @@ namespace chatroom {
         }
     }
 
-    std::mutex mtx;
-    
+    bool chatroom::checkCookies(const httplib::Request& req) {
+        std::string cookies = req.get_header_value("Cookie");
+
+        std::string password, uid;
+        transCookie(password, uid, cookies);
+
+        int uid_;
+        str::safeatoi(uid, uid_);
+        if (manager::FindUser(uid_) == nullptr) {
+            return false;
+        }
+        manager::user nowuser = *manager::FindUser(uid_);
+        if (nowuser.getpassword() != password) {
+            return false;
+        }
+        return true;
+    }
+
+
     //路由发送消息请求
-    void postChatMessage(const httplib::Request& req, httplib::Response& res, const Json::Value& root) {
+    void chatroom::postChatMessage(const httplib::Request& req, httplib::Response& res, const Json::Value& root) {
 
         res.set_header("Access-Control-Allow-Origin", "*"); // 允许所有来源访问
         res.set_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE"); // 允许的 HTTP 方法
@@ -122,7 +157,11 @@ namespace chatroom {
         newMessage["labei"] = nowuser.getlabei();
         string msgSafe = Keyword::process_string(Base64::base64_decode(root["message"].asString()));
         string codedmsg = Base64::base64_encode(msgSafe);
-
+        if (codedmsg.length() > 50000) {
+            res.status = 401;
+            res.set_content("Message too long", "text/plain");
+            return;
+        }
         newMessage["message"] = codedmsg;
         newMessage["imageUrl"] = root["imageUrl"];
         newMessage["timestamp"] = root["timestamp"];
@@ -142,7 +181,7 @@ namespace chatroom {
     }
 
     // 获取用户名接口
-    void getUsername(const httplib::Request& req, httplib::Response& res) {
+    void chatroom::getUsername(const httplib::Request& req, httplib::Response& res) {
 
         res.set_header("Access-Control-Allow-Origin", "*"); // 允许所有来源访问
         res.set_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE"); // 允许的 HTTP 方法
@@ -178,7 +217,8 @@ namespace chatroom {
         }
     }
 
-    void setupStaticRoutes() {
+    void chatroom::setupStaticRoutes() {
+        Server& server = server.getInstance(HOST);
         // 提供图片文件 /logo.png
         server.getInstance().handleRequest("/logo.png", [](const httplib::Request& req, httplib::Response& res) {
             std::ifstream logoFile("html/logo.png", std::ios::binary);
@@ -250,10 +290,7 @@ namespace chatroom {
             });
     }
 
-    // 允许的图片类型
-    const std::vector<std::string> allowedImageTypes = { ".jpg", ".jpeg", ".png", ".gif", ".bmp" ,"webp"};
-
-    bool isValidImage(const std::string& filename) {
+    bool chatroom::isValidImage(const std::string& filename) {
         // 获取文件扩展名
         std::string ext = filename.substr(filename.find_last_of("."));
         std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
@@ -263,7 +300,7 @@ namespace chatroom {
     }
 
 
-    void uploadImage(const httplib::Request& req, httplib::Response& res) {
+    void chatroom::uploadImage(const httplib::Request& req, httplib::Response& res) {
         res.set_header("Access-Control-Allow-Origin", "*");
         res.set_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
         res.set_header("Access-Control-Allow-Headers", "Content-Type");
@@ -309,18 +346,33 @@ namespace chatroom {
     }
 
 
-    void setupChatRoutes() {
+    void chatroom::setupChatRoutes() {
+        Server& server = server.getInstance(HOST);
         // 提供聊天记录的 GET 请求
-        server.getInstance().handleRequest("/chat/messages", getChatMessages);
+        server.getInstance().handleRequest("/chat/messages", [this](const httplib::Request& req, httplib::Response& res) {
+            getChatMessages(req, res);
+            });
+        //server.getInstance().handleRequest("/chat/messages", getChatMessages);
+
 
         // 处理 POST 请求，接收并保存新的聊天消息
-        server.getInstance().handlePostRequest("/chat/messages", postChatMessage);
+        server.getInstance().handlePostRequest("/chat/messages", [this](const httplib::Request& req, httplib::Response& res , const Json::Value& root) {
+                postChatMessage(req, res, root);  
+        });
+        //server.getInstance().handlePostRequest("/chat/messages", postChatMessage);
+
 
         // 获取用户名的 GET 请求
-        server.getInstance().handleRequest("/user/username", getUsername);
+        server.getInstance().handleRequest("/user/username", [this](const httplib::Request& req, httplib::Response& res) {
+            getUsername(req, res);
+            });
+        //server.getInstance().handleRequest("/user/username", getUsername);
 
         // 图片上传路由
-        server.getInstance().handlePostRequest("/chat/upload", uploadImage);
+        server.getInstance().handlePostRequest("/chat/upload", [this](const httplib::Request& req, httplib::Response& res) {
+            uploadImage(req, res);
+        });
+        //server.getInstance().handlePostRequest("/chat/upload", uploadImage);
         
 
         // 设置静态文件路由
@@ -329,15 +381,39 @@ namespace chatroom {
         
     }
 
+    bool chatroom::start() {
+        if (roomid == -1) {
+            return false;
+        }
+        initializeChatRoom();
+        setupChatRoutes();
+        Server& server = server.getInstance(HOST);
+        server.serveFile("/chat" + to_string(roomid), "html/index.html");
+        return true;
+    }
+    void chatroom::clearMessage() {
+        chatMessages.clear();
+        return;
+    }
+    void chatroom::settype(int _type) {
+        type = _type;
+    }
+    chatroom::chatroom(int id) {
+        roomid = id;
+        type = 0;
+    }
+    void chatroom::settittle(string tittle) {
+        chatTitle = tittle;
+    }
+    string chatroom::gettittle() {
+        return chatTitle;
+    }
+    void chatroom::init() {
+        type = 0;
+        clearMessage();
+        allowID.clear();
+    }
     
-}
+//---------chatroom
+    
 
-int start_chatroom() {
-    chatroom::initializeChatRoom();
-    chatroom::setupChatRoutes();
-
-    Server& server = server.getInstance(HOST);
-    server.serveFile("/chat", "html/index.html");
-
-    return 0;
-}
