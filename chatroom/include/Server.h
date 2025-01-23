@@ -6,7 +6,7 @@
 #include <functional>
 #include "../json/json.h"  // 引入 json 库
 const std::string HOST = "0.0.0.0";
-const int PORT = 80;
+const int PORT = 50000;
 const std::string ROOTURL = "/chat";
 class Server {
 public:
@@ -58,8 +58,11 @@ private:
 
 int start_chatroom();
 void start_loginSystem();
+#include "../json/json.h"
+#include <deque>
 namespace chatroom {
     void systemMessage(std::string message);//系统消息的声明
+    extern std::deque<Json::Value> chatMessages;
 }
 
 #endif

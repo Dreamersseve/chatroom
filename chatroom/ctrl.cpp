@@ -75,6 +75,10 @@ void command_runner(string command) {
 		logger.logInfo("Control", "消息已发送" + command);
 
 	}
+	else if (command.substr(0, 5) == "clear") {
+		chatroom::chatMessages.clear();
+		logger.logInfo("Control", "消息列表已清空" + command);
+	}
 	else {
 		logger.logError("Control","不合法的指令 " + command);
 	}
