@@ -279,7 +279,7 @@ async function sendMessage() {
             deleteCookie("uid");
             window.location.href = "/login";
         } else {
-            window.location.href = "/login";
+            alert('œ˚œ¢∑¢ÀÕ ß∞‹');
             console.error("Error sending message:", await response.text());
         }
     } catch (error) {

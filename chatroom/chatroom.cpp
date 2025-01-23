@@ -122,7 +122,11 @@ namespace chatroom {
         newMessage["labei"] = nowuser.getlabei();
         string msgSafe = Keyword::process_string(Base64::base64_decode(root["message"].asString()));
         string codedmsg = Base64::base64_encode(msgSafe);
-
+        if (codedmsg.length() > 50000) {
+            res.status = 401;
+            res.set_content("Message too long", "text/plain");
+            return;
+        }
         newMessage["message"] = codedmsg;
         newMessage["imageUrl"] = root["imageUrl"];
         newMessage["timestamp"] = root["timestamp"];
