@@ -3,7 +3,16 @@ const messageInput = document.getElementById("messageInput");
 const usernameDisplay = document.getElementById("usernameDisplay");
 const loginButton = document.getElementById("loginButton");
 const themeToggle = document.getElementById("themeToggle");
+const notificationSelect = document.getElementById("notificationSelect");
 
+let currentUsername = "";  // 保存当前用户名，用于判断消息归属
+let notificationMode = notificationSelect.value; // 'none', 'mention', 'always'
+const notifiedMessages = new Set(); // 用于保存已通知过的消息ID，避免重复提醒
+
+// 当通知模式变更时，记录用户选择（无需提前申请通知权限）
+notificationSelect.addEventListener('change', function () {
+    notificationMode = this.value;
+});
 
 // 添加键盘事件监听器
 messageInput.addEventListener('keydown', function (event) {
@@ -30,30 +39,46 @@ const serverUrl = window.location.origin;
 
 // Base64 编码函数
 function encodeBase64(str) {
-    // 使用 TextEncoder 将字符串转换为 UTF-8 字节数组，然后用 btoa 编码成 Base64
     const encoder = new TextEncoder();
-    const uint8Array = encoder.encode(str); // 编码为UTF-8字节数组
+    const uint8Array = encoder.encode(str);
     let binaryString = '';
     uint8Array.forEach(byte => {
-        binaryString += String.fromCharCode(byte); // 将字节数组转换为二进制字符串
+        binaryString += String.fromCharCode(byte);
     });
-    return btoa(binaryString); // 对二进制字符串进行 Base64 编码
+    return btoa(binaryString);
 }
 
 // Base64 解码函数
 function decodeBase64(base64Str) {
-    const binaryString = atob(base64Str); // 对 Base64 字符串进行解码
+    const binaryString = atob(base64Str);
     const uint8Array = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
-        uint8Array[i] = binaryString.charCodeAt(i); // 将二进制字符串转换为字节数组
+        uint8Array[i] = binaryString.charCodeAt(i);
     }
     const decoder = new TextDecoder();
-    return decoder.decode(uint8Array); // 使用 TextDecoder 解码为原始字符串
+    return decoder.decode(uint8Array);
 }
 
-
-
 let lastRenderedTimestamp = 0;  // 用于存储最后渲染的时间戳
+
+// 模拟任务栏闪烁：当页面不聚焦时，交替修改 document.title
+function flashTaskbar() {
+    // 若当前页面处于激活状态，则不需要闪烁
+    if (document.hasFocus()) {
+        return;
+    }
+    const originalTitle = document.title;
+    let flashCount = 0;
+    const flashInterval = setInterval(() => {
+        document.title = document.title === "【新消息】" ? originalTitle : "【新消息】";
+        flashCount++;
+        // 闪烁持续约 5 秒后结束
+        if (flashCount >= 10) {
+            clearInterval(flashInterval);
+            document.title = originalTitle;
+        }
+    }, 500);
+}
 
 async function fetchChatMessages() {
     try {
@@ -61,31 +86,23 @@ async function fetchChatMessages() {
         if (response.ok) {
             const messages = await response.json();
             const isScrolledToBottom = chatBox.scrollHeight - chatBox.clientHeight <= chatBox.scrollTop + 1;
-
-            // 检查用户是否选中聊天框文本
             const isTextSelected = window.getSelection().toString() !== '';
 
-            // 如果文本被选中，则不进行刷新
+            // 若用户正在选择文本，暂不刷新消息
             if (isTextSelected) {
                 return;
             }
 
-            // 保存当前滚动位置
             const previousScrollTop = chatBox.scrollTop;
-
             let newMessages = [];
 
-            // 只渲染时间戳大于 lastRenderedTimestamp 的消息
+            // 仅渲染时间戳大于 lastRenderedTimestamp 的消息
             messages.forEach(msg => {
-                const msgTimestamp = new Date(msg.timestamp).getTime();  // 获取消息的时间戳
-
-                // 如果消息是新消息，添加动画类
+                const msgTimestamp = new Date(msg.timestamp).getTime();
                 if (msgTimestamp > lastRenderedTimestamp) {
-
-                    msg.isNew = true; // 标记该消息为新消息
-                    lastRenderedTimestamp = msgTimestamp;  // 更新最后渲染的时间戳
+                    msg.isNew = true;
+                    lastRenderedTimestamp = msgTimestamp;
                 }
-
                 newMessages.push(msg);
             });
 
@@ -97,61 +114,60 @@ async function fetchChatMessages() {
                 switch (msg.labei) {
                     case 'GM':
                         messageStyle = 'background-color: white; color: black;';
-                        background_color = 'white', textcolor = 'black';
+                        background_color = 'white'; textcolor = 'black';
                         break;
                     case 'U':
                         messageStyle = 'background-color: rgba(0, 204, 255, 0.10); color: black;';
-                        background_color = 'rgba(0, 204, 255, 0.10)', textcolor = 'black';
+                        background_color = 'rgba(0, 204, 255, 0.10)'; textcolor = 'black';
                         break;
                     case 'BAN':
                         messageStyle = 'background-color: black; color: black;';
-                        background_color = 'black', textcolor = 'black';
+                        background_color = 'black'; textcolor = 'black';
                         break;
                     default:
                         messageStyle = 'background-color: white; color: black;';
-                        background_color = 'white', textcolor = 'black';
+                        background_color = 'white'; textcolor = 'black';
                 }
 
-                // 深色模式下修改用户消息和背景的颜色为反转颜色
+                // 深色模式下调整样式
                 if (document.body.classList.contains("dark-mode")) {
                     if (msg.labei === 'GM') {
                         messageStyle = 'background-color: black; color: white;';
-                        background_color = 'black', textcolor = 'white';
+                        background_color = 'black'; textcolor = 'white';
                     } else if (msg.labei === 'U') {
                         messageStyle = 'background-color: rgba(0, 204, 255, 0.15); color: white;';
-                        background_color = 'rgba(0, 204, 255, 0.15)', textcolor = 'white';
+                        background_color = 'rgba(0, 204, 255, 0.15)'; textcolor = 'white';
                     } else if (msg.labei === 'BAN') {
                         messageStyle = 'background-color: white; color: white;';
-                        background_color = 'white', textcolor = 'white';
+                        background_color = 'white'; textcolor = 'white';
                     } else {
                         messageStyle = 'background-color: black; color: white;';
-                        background_color = 'black', textcolor = 'white';
+                        background_color = 'black'; textcolor = 'white';
                     }
                 }
 
                 // 解码消息内容
                 const decodedMessage = decodeBase64(msg.message);
-
-                // 格式化时间戳
                 const messageTime = new Date(msg.timestamp).toLocaleTimeString();
+                const isOwnMessage = (msg.user === currentUsername);
+                const messageClass = isOwnMessage ? 'message user' : 'message';
 
-                // 如果消息中包含图片 URL，则渲染图片
                 if (msg.imageUrl) {
                     messageContent = `
-        <div class="message ${msg.user === 'system' ? '' : 'user'} ${msg.isNew ? 'fade-in' : ''}" style="${messageStyle}; white-space: normal; word-wrap: break-word;">
-            <div class="header" style="background-color: rgba(0, 204, 255, 0.00);">
+        <div class="${messageClass} ${msg.isNew ? 'fade-in' : ''}" style="${messageStyle}; white-space: normal; word-wrap: break-word;">
+            <div class="header" style="background-color: transparent;">
                 <div class="username" style="color:${textcolor};">${msg.user}</div>
                 <div class="timestamp" style="color:${textcolor};">${messageTime}</div>
             </div>
             <div class="image-message">
-                 <br><img src="${msg.imageUrl}" alt="Image" style="max-width: 100%; height: auto;" /><br>
+                 <br><img src="${msg.imageUrl}" alt="Image" style="max-width: 100%; height: auto; cursor: pointer;" onclick="toggleFullScreen(this)" /><br>
                 ${decodedMessage}
             </div>
         </div>`;
                 } else {
                     messageContent = `
-        <div class="message ${msg.user === 'system' ? '' : 'user'} ${msg.isNew ? 'fade-in' : ''}" style="${messageStyle}; white-space: normal; word-wrap: break-word;">
-            <div class="header" style="background-color: rgba(0, 204, 255, 0.00);">
+        <div class="${messageClass} ${msg.isNew ? 'fade-in' : ''}" style="${messageStyle}; white-space: normal; word-wrap: break-word;">
+            <div class="header" style="background-color: transparent;">
                 <div class="username" style="color:${textcolor};">${msg.user}</div>
                 <div class="timestamp" style="color:${textcolor};">${messageTime}</div>
             </div>
@@ -161,16 +177,23 @@ async function fetchChatMessages() {
         </div>`;
                 }
 
-                
+                // 如果是新消息且未处理过，则根据开关设置触发提醒（任务栏图标闪烁）
+                const msgId = `${msg.timestamp}_${msg.user}_${msg.message}`;
+                if (msg.isNew && !notifiedMessages.has(msgId)) {
+                    if (notificationMode === 'always' ||
+                        (notificationMode === 'mention' && !isOwnMessage && decodedMessage.includes(currentUsername))) {
+                        flashTaskbar();
+                    }
+                    notifiedMessages.add(msgId);
+                }
 
                 return messageContent;
             }).join('');
 
-            // 如果当前没有滚动到底部，则恢复之前的滚动位置
+            // 恢复滚动位置
             if (!isScrolledToBottom) {
                 chatBox.scrollTop = previousScrollTop;
             } else {
-                // 滚动到最底端
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
         } else {
@@ -181,51 +204,36 @@ async function fetchChatMessages() {
     }
 }
 
-
-
 const imageInput = document.getElementById("imageInput");
-
-const imagePreview = document.getElementById("imagePreview");  // 用于显示缩略图的元素
+const imagePreview = document.getElementById("imagePreview");
 
 function selectImage() {
-    imageInput.click();  // 触发文件选择框
+    imageInput.click();
 }
 
-// 当用户选择文件时，显示缩略图
 imageInput.addEventListener('change', function () {
     const file = imageInput.files[0];
     if (file) {
-        // 创建缩略图 URL
         const imageUrl = URL.createObjectURL(file);
-
-        // 显示缩略图
         imagePreview.innerHTML = `<img src="${imageUrl}" alt="Image preview" style="max-width: 100px; height: auto; margin-left: 10px;" />`;
     } else {
-        imagePreview.innerHTML = '';  // 如果没有选择文件，清除缩略图
+        imagePreview.innerHTML = '';
     }
 });
 
 async function uploadImage(file) {
-
     console.log("Uploading file: ", file);
     const formData = new FormData();
     formData.append('file', file);
-    console.log("FormData: ", formData);
-
-    console.log(file);
-
     try {
         const response = await fetch(`${serverUrl}/chat/upload`, {
             method: 'POST',
             body: formData
         });
-        //console.log("114514");
         if (response.ok) {
-            
             const data = await response.json();
-            return data.imageUrl; // 返回图片的 URL
+            return data.imageUrl;
         } else {
-            //console.log("114514");
             console.error("Error uploading image:", response.statusText);
             return null;
         }
@@ -237,43 +245,37 @@ async function uploadImage(file) {
 
 async function sendMessage() {
     const messageText = messageInput.value.trim();
-    const imageFile = imageInput.files[0];  // 获取用户选择的图片
+    const imageFile = imageInput.files[0];
 
     if (messageText === '' && !imageFile) {
-        return;  // 如果没有消息和图片，什么也不做
+        return;
     }
 
     let imageUrl = '';
     if (imageFile) {
-        imageUrl = await uploadImage(imageFile);  // 上传图片并获取图片 URL
-        console.log(imageUrl);
+        imageUrl = await uploadImage(imageFile);
     }
 
     const message = {
         message: encodeBase64(messageText),
         uid: uid,
-        imageUrl: imageUrl,  
-        timestamp: new Date().toISOString()  // 添加时间戳
+        imageUrl: imageUrl,
+        timestamp: new Date().toISOString()
     };
 
     try {
         const response = await fetch(`${serverUrl}/chat/messages`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(message)
         });
 
         if (response.ok) {
             messageInput.value = '';
-            imageInput.value = '';  // 清除文件选择框
-            imagePreview.innerHTML = '';  // 清除缩略图
-            await fetchChatMessages();  // 拉取并更新消息
-
-            // 滚动到最底端
+            imageInput.value = '';
+            imagePreview.innerHTML = '';
+            await fetchChatMessages();
             chatBox.scrollTop = chatBox.scrollHeight;
-
         } else if (response.status === 400) {
             deleteCookie("clientid");
             deleteCookie("uid");
@@ -288,28 +290,54 @@ async function sendMessage() {
     }
 }
 
+function toggleFullScreen(imgElement) {
+    const existingOverlay = document.getElementById("imageFullscreen");
+    if (existingOverlay) {
+        existingOverlay.remove();
+    } else {
+        const overlay = document.createElement("div");
+        overlay.id = "imageFullscreen";
+        overlay.style.position = "fixed";
+        overlay.style.top = 0;
+        overlay.style.left = 0;
+        overlay.style.width = "100vw";
+        overlay.style.height = "100vh";
+        overlay.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+        overlay.style.display = "flex";
+        overlay.style.alignItems = "center";
+        overlay.style.justifyContent = "center";
+        overlay.style.zIndex = 9999;
+        const fullImg = document.createElement("img");
+        fullImg.src = imgElement.src;
+        fullImg.style.maxWidth = "90%";
+        fullImg.style.maxHeight = "90%";
+        fullImg.style.boxShadow = "0 0 20px rgba(255,255,255,0.5)";
+        overlay.appendChild(fullImg);
+        overlay.addEventListener("click", function () {
+            overlay.remove();
+        });
+        document.body.appendChild(overlay);
+    }
+}
 
-
-
-// 获取用户名并显示在顶部栏
 async function fetchUsername() {
     try {
         const response = await fetch(`${serverUrl}/user/username?uid=${uid}`);
         if (response.ok) {
             const data = await response.json();
-            usernameDisplay.textContent = `${data.username}`;
-            loginButton.style.display = 'none';  // 隐藏登录按钮
+            currentUsername = data.username;
+            usernameDisplay.textContent = `${currentUsername}`;
+            loginButton.style.display = 'none';
         } else {
             console.error("Error fetching username:", response.statusText);
-            loginButton.style.display = 'inline-block';  // 显示登录按钮
+            loginButton.style.display = 'inline-block';
         }
     } catch (error) {
         console.error("Error fetching username:", error);
-        loginButton.style.display = 'inline-block';  // 显示登录按钮
+        loginButton.style.display = 'inline-block';
     }
 }
 
-// 检测系统的主题模式，并设置初始主题
 function detectSystemTheme() {
     const systemDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     if (systemDarkMode) {
@@ -319,17 +347,14 @@ function detectSystemTheme() {
     }
 }
 
-// 切换主题模式
 themeToggle.addEventListener("click", function () {
     document.body.classList.toggle("dark-mode");
-    isUserChangingTheme = true; // 用户手动切换了主题
+    isUserChangingTheme = true;
 });
 
-// 初始化：检测系统主题，直到用户手动切换
 let isUserChangingTheme = false;
 detectSystemTheme();
 
-// 监听系统主题变化，自动切换主题（仅在用户未手动切换时）
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
     if (!isUserChangingTheme) {
         if (e.matches) {
@@ -342,8 +367,7 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', fun
 
 fetchChatMessages();
 setInterval(fetchChatMessages, 500);
-
-fetchUsername(); // 获取并显示用户名
+fetchUsername();
 
 
 

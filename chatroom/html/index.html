@@ -37,6 +37,24 @@
                 font-weight: bold;
             }
 
+            /* 新增样式：通知模式选择下拉框 */
+            .header .notification-toggle {
+                margin-left: 20px;
+                font-size: 14px;
+                padding: 5px;
+                border-radius: 5px;
+                border: none;
+                background-color: #dcdcdc;
+                color: #007BFF;
+                cursor: pointer;
+                transition: background-color 0.2s, transform 0.1s ease;
+            }
+
+                .header .notification-toggle:hover {
+                    background-color: #c0c0c0;
+                    transform: scale(1.05);
+                }
+
             .header button {
                 padding: 8px 12px;
                 border-radius: 5px;
@@ -100,6 +118,7 @@
             word-wrap: break-word; /* 防止超长单词不换行 */
         }
 
+            /* 自己的消息右对齐 */
             .message.user {
                 background-color: #d0f0c0;
                 margin-left: auto;
@@ -329,6 +348,12 @@
         <div style="display: flex; align-items: center;">
             <img src="logo.png" alt="Logo">
             <div class="chatroom-title">seve's chatroom</div>
+            <!-- 新增通知模式下拉选择 -->
+            <select id="notificationSelect" class="notification-toggle">
+                <option value="none">不弹出通知</option>
+                <option value="mention">仅包含用户名时</option>
+                <option value="always">始终弹出通知</option>
+            </select>
         </div>
         <div style="display: flex; align-items: center;">
             <div class="username" id="usernameDisplay"></div>
